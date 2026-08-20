@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { createOrder } from "@/lib/orders";
+import { createPayment, verifyPayment } from "@/lib/payments";
+import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clear, total } = useCart();
@@ -21,15 +23,40 @@ export default function CartPage() {
     setError(null);
     setLoading(true);
     try {
-      await createOrder(
+      const order = await createOrder(
         accessToken,
         items.map((i) => ({ productId: i.productId, quantity: i.quantity }))
       );
-      clear();
-      router.push("/orders");
+      const payment = await createPayment(accessToken, order.id, order.totalAmount);
+
+      await loadRazorpayScript();
+      openRazorpayCheckout({
+        key: payment.razorpayKeyId,
+        amount: Math.round(payment.amount * 100),
+        currency: payment.currency,
+        order_id: payment.razorpayOrderId,
+        name: "EcommercePlatform",
+        handler: async (response) => {
+          try {
+            await verifyPayment(
+              response.razorpay_order_id,
+              response.razorpay_payment_id,
+              response.razorpay_signature
+            );
+            clear();
+            router.push("/orders");
+          } catch (err) {
+            setError(err instanceof Error ? err.message : "Payment verification failed");
+          } finally {
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => setLoading(false),
+        },
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Checkout failed");
-    } finally {
       setLoading(false);
     }
   }
