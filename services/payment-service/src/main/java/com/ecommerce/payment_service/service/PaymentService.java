@@ -1,5 +1,6 @@
 package com.ecommerce.payment_service.service;
 
+import com.ecommerce.payment_service.client.NotificationClient;
 import com.ecommerce.payment_service.dto.CreatePaymentRequest;
 import com.ecommerce.payment_service.dto.CreatePaymentResponse;
 import com.ecommerce.payment_service.dto.PaymentResponse;
@@ -27,17 +28,20 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final RazorpayClient razorpayClient;
+    private final NotificationClient notificationClient;
     private final String razorpayKeyId;
     private final String razorpayKeySecret;
 
     public PaymentService(
             PaymentRepository paymentRepository,
             RazorpayClient razorpayClient,
+            NotificationClient notificationClient,
             @Value("${razorpay.key-id}") String razorpayKeyId,
             @Value("${razorpay.key-secret}") String razorpayKeySecret
     ) {
         this.paymentRepository = paymentRepository;
         this.razorpayClient = razorpayClient;
+        this.notificationClient = notificationClient;
         this.razorpayKeyId = razorpayKeyId;
         this.razorpayKeySecret = razorpayKeySecret;
     }
@@ -100,6 +104,7 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.PAID);
         payment.setRazorpayPaymentId(request.razorpayPaymentId());
         payment.setUpdatedAt(Instant.now());
+        notificationClient.sendPaymentConfirmation(payment.getUserEmail(), payment.getOrderId(), payment.getAmount());
         return PaymentResponse.from(payment);
     }
 

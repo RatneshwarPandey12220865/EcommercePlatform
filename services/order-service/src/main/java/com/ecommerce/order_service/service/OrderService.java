@@ -1,5 +1,6 @@
 package com.ecommerce.order_service.service;
 
+import com.ecommerce.order_service.client.NotificationClient;
 import com.ecommerce.order_service.client.ProductClient;
 import com.ecommerce.order_service.client.ProductDto;
 import com.ecommerce.order_service.dto.CreateOrderRequest;
@@ -24,10 +25,12 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductClient productClient;
+    private final NotificationClient notificationClient;
 
-    public OrderService(OrderRepository orderRepository, ProductClient productClient) {
+    public OrderService(OrderRepository orderRepository, ProductClient productClient, NotificationClient notificationClient) {
         this.orderRepository = orderRepository;
         this.productClient = productClient;
+        this.notificationClient = notificationClient;
     }
 
     @Transactional
@@ -55,6 +58,7 @@ public class OrderService {
         order.setTotalAmount(total);
 
         orderRepository.save(order);
+        notificationClient.sendOrderConfirmation(userEmail, order.getId(), total);
         return OrderResponse.from(order);
     }
 

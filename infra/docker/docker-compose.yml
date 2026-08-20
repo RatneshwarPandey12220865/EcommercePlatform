@@ -53,6 +53,7 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       PRODUCT_SERVICE_URL: http://product-service:8082
+      NOTIFICATION_SERVICE_URL: http://notification-service:8085
     depends_on:
       postgres:
         condition: service_healthy
@@ -69,6 +70,7 @@ services:
       RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
       RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
       RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      NOTIFICATION_SERVICE_URL: http://notification-service:8085
     depends_on:
       postgres:
         condition: service_healthy
