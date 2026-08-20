@@ -8,17 +8,11 @@ export type CreatePaymentResponse = {
   currency: string;
 };
 
-export async function createPayment(
-  accessToken: string,
-  orderId: string,
-  amount: number
-): Promise<CreatePaymentResponse> {
+export async function createPayment(orderId: string, amount: number): Promise<CreatePaymentResponse> {
   const res = await fetch(`${API_BASE_URL}/api/payments`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ orderId, amount }),
   });
   if (!res.ok) {

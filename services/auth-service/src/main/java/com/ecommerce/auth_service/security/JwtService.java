@@ -72,4 +72,12 @@ public class JwtService {
     public String extractRole(String token) {
         return parseClaims(token).get("role", String.class);
     }
+
+    public long accessTokenTtlSeconds() {
+        return accessTokenTtlMs / 1000;
+    }
+
+    public long refreshTokenTtlSeconds() {
+        return refreshTokenTtlMs / 1000;
+    }
 }

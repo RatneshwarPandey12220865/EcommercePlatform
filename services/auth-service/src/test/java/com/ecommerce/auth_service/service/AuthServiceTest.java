@@ -1,6 +1,5 @@
 package com.ecommerce.auth_service.service;
 
-import com.ecommerce.auth_service.dto.AuthResponse;
 import com.ecommerce.auth_service.dto.LoginRequest;
 import com.ecommerce.auth_service.dto.RegisterRequest;
 import com.ecommerce.auth_service.entity.Role;
@@ -47,12 +46,12 @@ class AuthServiceTest {
         when(jwtService.generateAccessToken(request.email(), "USER")).thenReturn("access-token");
         when(jwtService.generateRefreshToken(request.email())).thenReturn("refresh-token");
 
-        AuthResponse response = authService.register(request);
+        AuthResult result = authService.register(request);
 
-        assertThat(response.accessToken()).isEqualTo("access-token");
-        assertThat(response.refreshToken()).isEqualTo("refresh-token");
-        assertThat(response.email()).isEqualTo(request.email());
-        assertThat(response.role()).isEqualTo("USER");
+        assertThat(result.accessToken()).isEqualTo("access-token");
+        assertThat(result.refreshToken()).isEqualTo("refresh-token");
+        assertThat(result.body().email()).isEqualTo(request.email());
+        assertThat(result.body().role()).isEqualTo("USER");
         verify(userRepository).save(argThat(u -> u.getEmail().equals(request.email()) && u.getPasswordHash().equals("hashed")));
     }
 
@@ -79,9 +78,9 @@ class AuthServiceTest {
         when(jwtService.generateAccessToken(anyString(), anyString())).thenReturn("access-token");
         when(jwtService.generateRefreshToken(anyString())).thenReturn("refresh-token");
 
-        AuthResponse response = authService.login(request);
+        AuthResult result = authService.login(request);
 
-        assertThat(response.accessToken()).isEqualTo("access-token");
+        assertThat(result.accessToken()).isEqualTo("access-token");
     }
 
     @Test

@@ -2,24 +2,26 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import type { AuthResponse } from "@/lib/api";
+import { logout as apiLogout } from "@/lib/api";
 
 type AuthState = {
   email: string | null;
   role: string | null;
-  accessToken: string | null;
   isAuthenticated: boolean;
   setSession: (auth: AuthResponse) => void;
-  clearSession: () => void;
+  logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
-const STORAGE_KEY = "ecommerce_auth";
+// Only UI-display state (email/role) lives here - the actual session lives in
+// an httpOnly cookie the browser controls, this is never the source of truth
+// for authorization.
+const STORAGE_KEY = "ecommerce_auth_profile";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -29,7 +31,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(parsed.email);
       setRole(parsed.role);
-      setAccessToken(parsed.accessToken);
     }
   }, []);
 
@@ -37,20 +38,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
     setEmail(auth.email);
     setRole(auth.role);
-    setAccessToken(auth.accessToken);
   }
 
-  function clearSession() {
+  async function logout() {
+    await apiLogout();
     localStorage.removeItem(STORAGE_KEY);
     setEmail(null);
     setRole(null);
-    setAccessToken(null);
   }
 
   return (
-    <AuthContext.Provider
-      value={{ email, role, accessToken, isAuthenticated: !!accessToken, setSession, clearSession }}
-    >
+    <AuthContext.Provider value={{ email, role, isAuthenticated: !!email, setSession, logout }}>
       {children}
     </AuthContext.Provider>
   );

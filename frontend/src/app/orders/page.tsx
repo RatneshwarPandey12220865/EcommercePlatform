@@ -6,23 +6,23 @@ import { useAuth } from "@/context/AuthContext";
 import { fetchOrders, type Order } from "@/lib/orders";
 
 export default function OrdersPage() {
-  const { accessToken, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!accessToken) {
+    if (!isAuthenticated) {
       // Synchronous exit for the "not logged in" case, not a reactive sync.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
-    fetchOrders(accessToken)
+    fetchOrders()
       .then((page) => setOrders(page.content))
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load orders"))
       .finally(() => setLoading(false));
-  }, [accessToken]);
+  }, [isAuthenticated]);
 
   if (!isAuthenticated) {
     return (

@@ -27,7 +27,7 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public AuthResult register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyInUseException(request.email());
         }
@@ -40,7 +40,7 @@ public class AuthService {
         return issueTokens(user);
     }
 
-    public AuthResponse login(LoginRequest request) {
+    public AuthResult login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(InvalidCredentialsException::new);
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
@@ -49,9 +49,10 @@ public class AuthService {
         return issueTokens(user);
     }
 
-    private AuthResponse issueTokens(User user) {
+    private AuthResult issueTokens(User user) {
         String accessToken = jwtService.generateAccessToken(user.getEmail(), user.getRole().name());
         String refreshToken = jwtService.generateRefreshToken(user.getEmail());
-        return new AuthResponse(accessToken, refreshToken, user.getEmail(), user.getRole().name());
+        AuthResponse body = new AuthResponse(user.getEmail(), user.getRole().name());
+        return new AuthResult(body, accessToken, refreshToken);
     }
 }

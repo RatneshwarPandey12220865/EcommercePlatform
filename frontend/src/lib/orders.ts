@@ -15,16 +15,11 @@ export type Order = {
   createdAt: string;
 };
 
-export async function createOrder(
-  accessToken: string,
-  items: { productId: string; quantity: number }[]
-): Promise<Order> {
+export async function createOrder(items: { productId: string; quantity: number }[]): Promise<Order> {
   const res = await fetch(`${API_BASE_URL}/api/orders`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ items }),
   });
   if (!res.ok) {
@@ -34,9 +29,9 @@ export async function createOrder(
   return res.json();
 }
 
-export async function fetchOrders(accessToken: string): Promise<{ content: Order[] }> {
+export async function fetchOrders(): Promise<{ content: Order[] }> {
   const res = await fetch(`${API_BASE_URL}/api/orders`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    credentials: "include",
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to load orders");

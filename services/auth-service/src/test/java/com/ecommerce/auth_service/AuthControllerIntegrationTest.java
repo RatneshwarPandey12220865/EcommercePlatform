@@ -42,7 +42,9 @@ class AuthControllerIntegrationTest {
 
         ResponseEntity<Map> registerResponse = restTemplate.postForEntity(baseUrl() + "/register", registerBody, Map.class);
         assertThat(registerResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(registerResponse.getBody()).containsKey("accessToken");
+        assertThat(registerResponse.getBody()).containsEntry("email", email).doesNotContainKey("accessToken");
+        assertThat(registerResponse.getHeaders().get("Set-Cookie"))
+                .anySatisfy(cookie -> assertThat(cookie).startsWith("access_token=").contains("HttpOnly"));
 
         Map<String, String> loginBody = Map.of("email", email, "password", "password123");
         ResponseEntity<Map> loginResponse = restTemplate.postForEntity(baseUrl() + "/login", loginBody, Map.class);

@@ -10,24 +10,21 @@ import { loadRazorpayScript, openRazorpayCheckout } from "@/lib/razorpay";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clear, total } = useCart();
-  const { accessToken, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleCheckout() {
-    if (!isAuthenticated || !accessToken) {
+    if (!isAuthenticated) {
       router.push("/login");
       return;
     }
     setError(null);
     setLoading(true);
     try {
-      const order = await createOrder(
-        accessToken,
-        items.map((i) => ({ productId: i.productId, quantity: i.quantity }))
-      );
-      const payment = await createPayment(accessToken, order.id, order.totalAmount);
+      const order = await createOrder(items.map((i) => ({ productId: i.productId, quantity: i.quantity })));
+      const payment = await createPayment(order.id, order.totalAmount);
 
       await loadRazorpayScript();
       openRazorpayCheckout({
