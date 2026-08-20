@@ -52,6 +52,7 @@ services:
     environment:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
+      PRODUCT_SERVICE_URL: http://product-service:8082
     depends_on:
       postgres:
         condition: service_healthy

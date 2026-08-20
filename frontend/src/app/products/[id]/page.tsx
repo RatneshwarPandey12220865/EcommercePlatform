@@ -1,4 +1,5 @@
 import { fetchProduct } from "@/lib/products";
+import { AddToCartButton } from "./AddToCartButton";
 
 export default async function ProductDetailPage({
   params,
@@ -17,6 +18,9 @@ export default async function ProductDetailPage({
       <p className="mt-1 text-sm text-gray-600">
         {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : "Out of stock"}
       </p>
+      {product.stockQuantity > 0 && (
+        <AddToCartButton productId={product.id} name={product.name} price={product.price} />
+      )}
     </main>
   );
 }
