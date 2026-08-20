@@ -1,6 +1,24 @@
 name: ecommerce-platform
 
 services:
+  api-gateway:
+    build:
+      context: ../../services/api-gateway
+      dockerfile: ../../infra/docker/Dockerfile.service
+    ports:
+      - "8080:8080"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8081
+      PRODUCT_SERVICE_URL: http://product-service:8082
+      ORDER_SERVICE_URL: http://order-service:8083
+      PAYMENT_SERVICE_URL: http://payment-service:8084
+      FRONTEND_ORIGIN: http://localhost:3000
+    depends_on:
+      - auth-service
+      - product-service
+      - order-service
+      - payment-service
+
   postgres:
     image: postgres:16-alpine
     environment:

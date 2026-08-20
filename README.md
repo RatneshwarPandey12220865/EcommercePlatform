@@ -7,6 +7,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for service breakdown and phase
 ## Structure
 ```
 services/
+  api-gateway/
   auth-service/
   product-service/
   order-service/
