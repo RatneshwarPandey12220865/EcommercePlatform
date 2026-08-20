@@ -21,8 +21,9 @@
 Each service owns its own Postgres schema/database. No service reads another's tables directly — only through its API. Each runs its own Flyway/JPA migrations.
 
 ## Auth model
-- auth-service issues short-lived JWT access tokens + refresh tokens.
-- Other services are resource servers: they validate the JWT signature/claims locally (shared public key or a shared secret in dev), no per-request call back to auth-service.
+- auth-service issues short-lived JWT access tokens + refresh tokens, set as httpOnly, SameSite=Lax cookies (`access_token` / `refresh_token`) - never exposed to JS, closing off the XSS-can-steal-the-token risk that comes with localStorage-based tokens.
+- Other services are resource servers: they validate the JWT signature/claims locally (shared secret in dev, would be a shared public key with asymmetric signing in production), no per-request call back to auth-service. Each JwtAuthFilter accepts the token from the cookie (browser traffic) or an `Authorization: Bearer` header (service-to-service calls, tooling).
+- Every service exposes interactive API docs at `/swagger-ui.html` (OpenAPI spec at `/v3/api-docs`) via springdoc.
 
 ## Phase status
 - [x] Phase 0 - Setup & Architecture
@@ -35,5 +36,5 @@ Each service owns its own Postgres schema/database. No service reads another's t
 - [x] Phase 7 - Cross-cutting (gateway, logging, rate limiting)
 - [ ] Phase 8 - Testing
 - [ ] Phase 9 - CI/CD
-- [ ] Phase 10 - Deployment
-- [ ] Phase 11 - Hardening & polish
+- [ ] Phase 10 - Deployment (skipped for now, no AWS account available)
+- [x] Phase 11 - Hardening & polish (JWT moved to httpOnly cookies, OpenAPI docs added; load testing and DB tuning deferred until there's a deployed environment/real data volume)
