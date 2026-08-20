@@ -25,6 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as AuthResponse;
+      // One-time hydration from localStorage on mount - not a reactive sync.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(parsed.email);
       setRole(parsed.role);
       setAccessToken(parsed.accessToken);

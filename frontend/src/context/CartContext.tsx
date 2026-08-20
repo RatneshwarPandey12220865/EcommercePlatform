@@ -27,6 +27,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
+    // One-time hydration from localStorage on mount - not a reactive sync.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (raw) setItems(JSON.parse(raw));
   }, []);
 

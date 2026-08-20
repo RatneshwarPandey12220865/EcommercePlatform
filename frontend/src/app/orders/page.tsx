@@ -13,6 +13,8 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!accessToken) {
+      // Synchronous exit for the "not logged in" case, not a reactive sync.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
