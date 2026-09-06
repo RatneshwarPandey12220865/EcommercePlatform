@@ -69,7 +69,7 @@ Each service owns its own Postgres schema/database. No service reads another's t
 - [x] Phase 5 - Payment service
 - [x] Phase 6 - Notification service
 - [x] Phase 7 - Cross-cutting (gateway, logging, rate limiting)
-- [ ] Phase 8 - Testing
-- [ ] Phase 9 - CI/CD
+- [x] Phase 8 - Testing (deep Mockito + Testcontainers coverage on auth-service and order-service; light unit tests on product/payment/notification-service)
+- [x] Phase 9 - CI/CD (GitHub Actions matrix build+test across all 6 backend services, plus a frontend lint/typecheck/build job)
 - [ ] Phase 10 - Deployment (skipped for now, no AWS account available)
 - [x] Phase 11 - Hardening & polish (JWT moved to httpOnly cookies, OpenAPI docs added; load testing and DB tuning deferred until there's a deployed environment/real data volume)
