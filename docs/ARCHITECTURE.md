@@ -17,6 +17,41 @@
 - Notifications are triggered by direct REST calls rather than a message broker (RabbitMQ) — call volume doesn't yet justify that infra; revisit if event fan-out or retry/replay semantics become necessary.
 - Cross-cutting: the gateway stamps every request with an `X-Request-Id` correlation header (generated or passed through) and applies a simple per-IP fixed-window rate limit.
 
+## Checkout flow
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Gateway as api-gateway
+    participant Order as order-service
+    participant Product as product-service
+    participant Payment as payment-service
+    participant Notify as notification-service
+    participant Razorpay
+
+    Browser->>Gateway: POST /api/orders (items)
+    Gateway->>Order: POST /api/orders
+    Order->>Product: GET /api/products/{id} (per item)
+    Product-->>Order: price, stockQuantity
+    Order->>Order: validate stock, compute total
+    Order->>Notify: POST /api/notifications/order-confirmation (best-effort)
+    Order-->>Browser: 201 Created (order)
+
+    Browser->>Gateway: POST /api/payments (orderId, amount)
+    Gateway->>Payment: POST /api/payments
+    Payment->>Razorpay: create order
+    Razorpay-->>Payment: razorpayOrderId
+    Payment-->>Browser: razorpayOrderId + key
+
+    Browser->>Razorpay: Checkout.js payment UI
+    Razorpay-->>Browser: razorpay_payment_id, razorpay_signature
+
+    Browser->>Gateway: POST /api/payments/verify
+    Gateway->>Payment: POST /api/payments/verify
+    Payment->>Payment: verify HMAC signature
+    Payment->>Notify: POST /api/notifications/payment-confirmation (best-effort)
+    Payment-->>Browser: 200 OK (PAID)
+```
+
 ## Data ownership
 Each service owns its own Postgres schema/database. No service reads another's tables directly — only through its API. Each runs its own Flyway/JPA migrations.
 
