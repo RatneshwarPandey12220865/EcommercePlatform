@@ -1,6 +1,6 @@
 # Generic multi-stage Dockerfile for any of the Spring Boot services.
 # Build from repo root: docker build -f infra/docker/Dockerfile.service --build-arg SERVICE=auth-service -t auth-service services/auth-service
-FROM eclipse-temurin:17-jdk-jammy AS build
+FROM eclipse-temurin:22-jdk-jammy AS build
 WORKDIR /app
 COPY mvnw .
 COPY .mvn .mvn
@@ -9,7 +9,7 @@ RUN chmod +x mvnw && ./mvnw -q dependency:go-offline
 COPY src src
 RUN ./mvnw -q package -DskipTests
 
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:22-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
